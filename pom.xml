@@ -4,15 +4,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>main.java.com.bgsoftware</groupId>
+    <groupId>com.bgsoftware</groupId>
     <artifactId>ssbslimeworldmanager</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.5.1</version>
     <name>SSBSlimeWorldManager</name>
     <packaging>jar</packaging>
 
     <properties>
-        <project.mainClass>uk.co.paulcodes.rrskyblock.Core</project.mainClass>
-        <project.author>PaulCodesUK</project.author>
+        <project.mainClass>com.bgsoftware.ssbslimeworldmanager.SSBSlimeWorldManager</project.mainClass>
+        <project.author>Ome_R</project.author>
     </properties>
 
     <repositories>
@@ -82,7 +82,7 @@
             </resource>
         </resources>
 
-        <finalName>${project.name}</finalName>
+        <finalName>${project.name}-${project.version}</finalName>
         <defaultGoal>clean install</defaultGoal>
         <!-- Plugins -->
         <plugins>

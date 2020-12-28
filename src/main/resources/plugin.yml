@@ -1,0 +1,7 @@
+name: ${project.name}
+version: ${project.version}
+api-version: 1.16
+author: ${project.author}
+main: ${project.mainClass}
+depend: [SlimeWorldManager]
+loadbefore: [SuperiorSkyblock2]
