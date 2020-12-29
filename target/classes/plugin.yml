@@ -1,0 +1,7 @@
+name: SSBSlimeWorldManager
+version: 1.5.1
+api-version: 1.16
+author: Ome_R, PaulCodesUK
+main: com.bgsoftware.ssbslimeworldmanager.SSBSlimeWorldManager
+depend: [SlimeWorldManager]
+loadbefore: [SuperiorSkyblock2]

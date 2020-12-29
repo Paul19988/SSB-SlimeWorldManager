@@ -69,7 +69,7 @@
     <orderEntry type="module-library">
       <library name="Maven: com.grinderwolf:slimeworldmanager:2.3.0-SNAPSHOT">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/slimeworldmanager-plugin-2.3.0-SNAPSHOT.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/slimeworldmanager-plugin-2.5.0-SNAPSHOT.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

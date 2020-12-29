@@ -144,7 +144,7 @@ public final class SlimeUtils {
     private static WorldData buildDefaultWorldData(){
         WorldData worldData = new WorldData();
 
-        worldData.setDataSource("file");
+        worldData.setDataSource("mysql");
         worldData.setDifficulty("normal");
         worldData.setLoadOnStartup(false);
 
