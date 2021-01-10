@@ -3,6 +3,8 @@ package com.bgsoftware.ssbslimeworldmanager;
 import com.bgsoftware.superiorskyblock.api.SuperiorSkyblockAPI;
 import com.bgsoftware.superiorskyblock.api.island.Island;
 import com.grinderwolf.swm.api.SlimePlugin;
+import com.grinderwolf.swm.api.exceptions.WorldAlreadyExistsException;
+import com.grinderwolf.swm.api.loaders.SlimeLoader;
 import com.grinderwolf.swm.api.world.SlimeWorld;
 import com.grinderwolf.swm.api.world.properties.SlimeProperties;
 import com.grinderwolf.swm.api.world.properties.SlimePropertyMap;
@@ -12,7 +14,9 @@ import com.grinderwolf.swm.plugin.config.WorldData;
 import com.grinderwolf.swm.plugin.config.WorldsConfig;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.WorldType;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -22,15 +26,42 @@ public final class SlimeUtils {
     private static final Map<String, SlimeWorld> islandWorlds = new HashMap<>();
 
     private static final SlimePlugin slimePlugin;
-    private static final WorldData defaultWorldData = buildDefaultWorldData();
+    private static WorldData defaultWorldData;
+    private static SlimeLoader slimeLoader;
 
     static {
         slimePlugin = (SlimePlugin) Bukkit.getPluginManager().getPlugin("SlimeWorldManager");
+        slimeLoader = slimePlugin.getLoader(SSBSlimeWorldManager.getConfLoader());
     }
 
     private SlimeUtils() { }
 
-    public static void init() { }
+    public static void init() {
+        try {
+            if(!slimeLoader.worldExists("SuperiorWorld")) {
+                String worldName = "SuperiorWorld";
+                WorldData worldData = new WorldData();
+
+                worldData.setDataSource(SSBSlimeWorldManager.getConfLoader());
+                worldData.setDifficulty("normal");
+                worldData.setAllowAnimals(false);
+                worldData.setAllowMonsters(false);
+                worldData.setPvp(false);
+                worldData.setLoadOnStartup(true);
+
+                slimePlugin.createEmptyWorld(slimeLoader, worldName, false, worldData.toPropertyMap());
+
+                WorldsConfig config = ConfigManager.getWorldConfig();
+                config.getWorlds().put(worldName, worldData);
+                config.save();
+            }
+        } catch(IOException e) {
+            e.printStackTrace();
+        } catch(WorldAlreadyExistsException e) {
+            e.printStackTrace();
+        }
+        defaultWorldData = buildDefaultWorldData();
+    }
 
     public static void unloadAllWorlds(){
         try{
@@ -144,7 +175,7 @@ public final class SlimeUtils {
     private static WorldData buildDefaultWorldData(){
         WorldData worldData = new WorldData();
 
-        worldData.setDataSource("mysql");
+        worldData.setDataSource(SSBSlimeWorldManager.getConfLoader());
         worldData.setDifficulty("normal");
         worldData.setLoadOnStartup(false);
 

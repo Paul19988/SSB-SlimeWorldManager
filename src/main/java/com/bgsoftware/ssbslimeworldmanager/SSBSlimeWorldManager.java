@@ -13,10 +13,19 @@ import java.util.Arrays;
 public final class SSBSlimeWorldManager extends JavaPlugin implements Listener {
 
     public static SSBSlimeWorldManager plugin;
+    private static String loader;
 
     @Override
     public void onEnable() {
         plugin = this;
+
+        if(!getConfig().isString("loader")) {
+            getConfig().set("loader", "mysql");
+            saveConfig();
+            loader = "mysql";
+        }else{
+            loader = getConfig().getString("loader");
+        }
 
         SlimeUtils.init();
 
@@ -39,4 +48,7 @@ public final class SSBSlimeWorldManager extends JavaPlugin implements Listener {
         Arrays.stream(World.Environment.values()).forEach(environment -> SlimeUtils.deleteWorld(e.getIsland(), environment));
     }
 
+    public static String getConfLoader() {
+        return loader;
+    }
 }
