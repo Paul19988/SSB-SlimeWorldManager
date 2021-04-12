@@ -29,6 +29,7 @@ public final class SlimeUtils {
     private static final SlimePlugin slimePlugin;
     private static WorldData defaultWorldData;
     private static WorldData defaultNetherWorldData;
+    private static WorldData defaultEndWorldData;
     private static SlimeLoader slimeLoader;
 
     static {
@@ -62,6 +63,7 @@ public final class SlimeUtils {
         }
         defaultWorldData = buildDefaultWorldData();
         defaultNetherWorldData = buildDefaultNetherWorldData();
+        defaultEndWorldData = buildDefaultEndWorldData();
     }
 
     public static void unloadAllWorlds(){
@@ -101,7 +103,16 @@ public final class SlimeUtils {
                         WorldsConfig config = ConfigManager.getWorldConfig();
                         config.getWorlds().put(worldName, defaultNetherWorldData);
                         config.save();
-                    }else {
+                    }else if(worldName.toLowerCase().contains("the_end")) {
+                        SlimePropertyMap slimePropertyMap = defaultEndWorldData.toPropertyMap();
+                        slimePropertyMap.setString(SlimeProperties.ENVIRONMENT, environment.name().toUpperCase());
+                        slimeWorld = slimePlugin.createEmptyWorld(slimePlugin.getLoader(defaultEndWorldData.getDataSource()), worldName, defaultEndWorldData.isReadOnly(), slimePropertyMap);
+
+                        // Saving the world
+                        WorldsConfig config = ConfigManager.getWorldConfig();
+                        config.getWorlds().put(worldName, defaultEndWorldData);
+                        config.save();
+                    }else{
                         SlimePropertyMap slimePropertyMap = defaultWorldData.toPropertyMap();
                         slimePropertyMap.setString(SlimeProperties.ENVIRONMENT, environment.name().toUpperCase());
                         slimeWorld = slimePlugin.createEmptyWorld(slimePlugin.getLoader(defaultWorldData.getDataSource()), worldName, defaultWorldData.isReadOnly(), slimePropertyMap);
@@ -204,6 +215,18 @@ public final class SlimeUtils {
         worldData.setDataSource(SSBSlimeWorldManager.getConfLoader());
         worldData.setEnvironment("NETHER");
         worldData.setDefaultBiome("minecraft:nether_wastes");
+        worldData.setDifficulty("normal");
+        worldData.setLoadOnStartup(false);
+
+        return worldData;
+    }
+
+    private static WorldData buildDefaultEndWorldData(){
+        WorldData worldData = new WorldData();
+
+        worldData.setDataSource(SSBSlimeWorldManager.getConfLoader());
+        worldData.setEnvironment("THE_END");
+        worldData.setDefaultBiome("minecraft:the_end");
         worldData.setDifficulty("normal");
         worldData.setLoadOnStartup(false);
 
