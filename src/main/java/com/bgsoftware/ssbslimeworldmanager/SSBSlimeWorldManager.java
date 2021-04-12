@@ -1,5 +1,6 @@
 package com.bgsoftware.ssbslimeworldmanager;
 
+import com.bgsoftware.ssbslimeworldmanager.listeners.ConnectionListener;
 import com.bgsoftware.superiorskyblock.api.events.IslandDisbandEvent;
 import com.bgsoftware.superiorskyblock.api.events.PluginInitializeEvent;
 import org.bukkit.World;
@@ -14,6 +15,8 @@ public final class SSBSlimeWorldManager extends JavaPlugin implements Listener {
 
     public static SSBSlimeWorldManager plugin;
     private static String loader;
+    private boolean autoLoad;
+    private boolean autoUnload;
 
     @Override
     public void onEnable() {
@@ -27,9 +30,26 @@ public final class SSBSlimeWorldManager extends JavaPlugin implements Listener {
             loader = getConfig().getString("loader");
         }
 
+        if(!getConfig().isBoolean("autoload")) {
+            getConfig().set("autoload", true);
+            saveConfig();
+            autoLoad = true;
+        }else{
+            autoLoad = getConfig().getBoolean("autoload");
+        }
+
+        if(!getConfig().isBoolean("autounload")) {
+            getConfig().set("autounload", true);
+            saveConfig();
+            autoUnload = true;
+        }else{
+            autoUnload = getConfig().getBoolean("autounload");
+        }
+
         SlimeUtils.init();
 
         getServer().getPluginManager().registerEvents(this, this);
+        getServer().getPluginManager().registerEvents(new ConnectionListener(), this);
     }
 
     @Override
@@ -50,5 +70,17 @@ public final class SSBSlimeWorldManager extends JavaPlugin implements Listener {
 
     public static String getConfLoader() {
         return loader;
+    }
+
+    public boolean isAutoLoad() {
+        return autoLoad;
+    }
+
+    public boolean isAutoUnload() {
+        return autoUnload;
+    }
+
+    public static SSBSlimeWorldManager getInstance() {
+        return SSBSlimeWorldManager.getPlugin(SSBSlimeWorldManager.class);
     }
 }

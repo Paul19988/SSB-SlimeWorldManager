@@ -3,6 +3,7 @@ package com.bgsoftware.ssbslimeworldmanager;
 import com.bgsoftware.superiorskyblock.api.SuperiorSkyblockAPI;
 import com.bgsoftware.superiorskyblock.api.island.Island;
 import com.grinderwolf.swm.api.SlimePlugin;
+import com.grinderwolf.swm.api.exceptions.UnknownWorldException;
 import com.grinderwolf.swm.api.exceptions.WorldAlreadyExistsException;
 import com.grinderwolf.swm.api.loaders.SlimeLoader;
 import com.grinderwolf.swm.api.world.SlimeWorld;
@@ -27,6 +28,7 @@ public final class SlimeUtils {
 
     private static final SlimePlugin slimePlugin;
     private static WorldData defaultWorldData;
+    private static WorldData defaultNetherWorldData;
     private static SlimeLoader slimeLoader;
 
     static {
@@ -55,12 +57,11 @@ public final class SlimeUtils {
                 config.getWorlds().put(worldName, worldData);
                 config.save();
             }
-        } catch(IOException e) {
-            e.printStackTrace();
-        } catch(WorldAlreadyExistsException e) {
+        } catch(IOException | WorldAlreadyExistsException e) {
             e.printStackTrace();
         }
         defaultWorldData = buildDefaultWorldData();
+        defaultNetherWorldData = buildDefaultNetherWorldData();
     }
 
     public static void unloadAllWorlds(){
@@ -91,15 +92,25 @@ public final class SlimeUtils {
             try {
                 // No world was found, creating a new world.
                 if (worldData == null) {
-                    SlimePropertyMap slimePropertyMap = defaultWorldData.toPropertyMap();
-                    slimePropertyMap.setString(SlimeProperties.ENVIRONMENT, environment.name().toUpperCase());
-                    slimeWorld = slimePlugin.createEmptyWorld(slimePlugin.getLoader(defaultWorldData.getDataSource()),
-                            worldName, defaultWorldData.isReadOnly(), slimePropertyMap);
+                    if(worldName.toLowerCase().contains("nether")) {
+                        SlimePropertyMap slimePropertyMap = defaultNetherWorldData.toPropertyMap();
+                        slimePropertyMap.setString(SlimeProperties.ENVIRONMENT, environment.name().toUpperCase());
+                        slimeWorld = slimePlugin.createEmptyWorld(slimePlugin.getLoader(defaultNetherWorldData.getDataSource()), worldName, defaultNetherWorldData.isReadOnly(), slimePropertyMap);
 
-                    // Saving the world
-                    WorldsConfig config = ConfigManager.getWorldConfig();
-                    config.getWorlds().put(worldName, defaultWorldData);
-                    config.save();
+                        // Saving the world
+                        WorldsConfig config = ConfigManager.getWorldConfig();
+                        config.getWorlds().put(worldName, defaultNetherWorldData);
+                        config.save();
+                    }else {
+                        SlimePropertyMap slimePropertyMap = defaultWorldData.toPropertyMap();
+                        slimePropertyMap.setString(SlimeProperties.ENVIRONMENT, environment.name().toUpperCase());
+                        slimeWorld = slimePlugin.createEmptyWorld(slimePlugin.getLoader(defaultWorldData.getDataSource()), worldName, defaultWorldData.isReadOnly(), slimePropertyMap);
+
+                        // Saving the world
+                        WorldsConfig config = ConfigManager.getWorldConfig();
+                        config.getWorlds().put(worldName, defaultWorldData);
+                        config.save();
+                    }
                 } else {
                     slimeWorld = slimePlugin.loadWorld(slimePlugin.getLoader(worldData.getDataSource()),
                             worldName, worldData.isReadOnly(), worldData.toPropertyMap());
@@ -149,7 +160,11 @@ public final class SlimeUtils {
                 ex.printStackTrace();
             }
         }
-        Bukkit.unloadWorld(worldName, true);
+        if(Bukkit.getWorld(worldName).getPlayers().isEmpty()) {
+            Bukkit.unloadWorld(worldName, true);
+        }else{
+
+        }
     }
 
     public static String getWorldName(Island island, World.Environment environment){
@@ -176,10 +191,59 @@ public final class SlimeUtils {
         WorldData worldData = new WorldData();
 
         worldData.setDataSource(SSBSlimeWorldManager.getConfLoader());
+        worldData.setEnvironment("NORMAL");
         worldData.setDifficulty("normal");
         worldData.setLoadOnStartup(false);
 
         return worldData;
+    }
+
+    private static WorldData buildDefaultNetherWorldData(){
+        WorldData worldData = new WorldData();
+
+        worldData.setDataSource(SSBSlimeWorldManager.getConfLoader());
+        worldData.setEnvironment("NETHER");
+        worldData.setDefaultBiome("minecraft:nether_wastes");
+        worldData.setDifficulty("normal");
+        worldData.setLoadOnStartup(false);
+
+        return worldData;
+    }
+
+    public static boolean isWorldLoaded(String worldName) {
+        try {
+            System.out.println("Checking lock world: " + worldName);
+            return slimeLoader.isWorldLocked(worldName);
+        } catch(UnknownWorldException | IOException e) {
+            System.out.println("World: " + worldName + " does not exist.");
+            return false;
+        }
+    }
+
+    public static boolean isWorldPopulated(String worldName) {
+        if(isWorldLoaded(worldName)) {
+            if(Bukkit.getWorld(worldName).getPlayers().size() <= 0) {
+                return false;
+            } else {
+                System.out.println("World: " + worldName + " still contains players so cannot unload.");
+                return true;
+            }
+        }else{
+            return false;
+        }
+    }
+
+    public static String getWorldNameFull(String worldUUID, Environment environment) {
+        switch(environment) {
+            case NORMAL:
+                return "island_" + worldUUID + "_normal";
+            case NETHER:
+                return "island_" + worldUUID + "_nether";
+            case THE_END:
+                return "island_" + worldUUID + "_the_end";
+            default:
+                return "";
+        }
     }
 
 }
